@@ -9,7 +9,6 @@
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
 
   <style>
-
     body::before {
       content: "";
       position: fixed;
@@ -42,11 +41,9 @@
     .map-section {
       position: relative;
     }
-
     #map {
       height: 75vh;
       min-height: 600px;
-
       width: 100%;
       border-radius: 18px;
       overflow: hidden;
@@ -54,20 +51,13 @@
     }
     .overlay-box {
       position: absolute;
-
       top: 50px;
       right: 50px;
-
       width: 350px;
-
       z-index: 1000;
-
       background: rgb(255, 255, 255, 0.55);
-
       backdrop-filter: blur(10px);
-
       border-radius: 18px;
-
       box-shadow: 0 10px 30px rgba(0,0,0,0.25);
     }
     .trail-img, .modal-img { width:100%; object-fit:cover; }
@@ -98,52 +88,40 @@
     </div>
   </nav>
   <section class="map-section position-relative p-4">
-
     <div id="map"></div>
-
     <div class="overlay-box card">
       <div class="card-body">
-
         <h2 class="text-success-emphasis">
           Your adventure awaits
         </h2>
-
         <p class="small">
           Use quick options or the search bar to find the right trail for you!
         </p>
-
         <input
           id="search"
           class="form-control mb-3"
           placeholder="Search by name, city, park...">
-
         <div class="d-flex flex-wrap gap-2">
           <button class="btn btn-gold"
-            onclick="setFilter('difficulty','Easy')">
+            onclick="setFilter('Difficulty','Easy')">
             Easy
           </button>
-
           <button class="btn btn-gold"
-            onclick="setFilter('suitability,'Wheelchair-Friendly')">
+            onclick="setFilter('Suitability','Wheelchair-Friendly')">
             Wheelchair
           </button>
-
           <button class="btn btn-gold"
-            onclick="setFilter('suitability','Kid-Friendly')">
+            onclick="setFilter('Suitability','Family-Friendly')">
             Family
           </button>
-
           <button class="btn btn-outline-secondary"
             onclick="resetFilters()">
             Reset
           </button>
         </div>
-
       </div>
     </div>
-
   </section>
-
   <main id="trails" class="container-fluid px-4 pb-4">
     <div class="row g-4">
       <aside class="col-lg-3">
@@ -153,10 +131,9 @@
           <label class="form-label mt-3">Distance</label><select id="distance" class="form-select filter"><option>All</option><option>0-3 miles</option><option>3-7 miles</option><option>7+ miles</option></select>
           <label class="form-label mt-3">Elevation</label><select id="elevation" class="form-select filter"><option>All</option><option>0-500 feet</option><option>500-1500 feet</option><option>1500+ feet</option></select>
           <label class="form-label mt-3">Route Type</label><select id="route_type" class="form-select filter"><option>All</option><option>loop</option><option>point-to-point</option><option>out & back</option></select>
-          <label class="form-label mt-3">Suitability</label><select id="suitability" class="form-select filter"><option>All</option><option>Dog-friendly</option><option>Wheelchair-friendly</option><option>Kid-friendly</option><option>Stroller-friendly</option></select>
+          <label class="form-label mt-3">Suitability</label><select id="suitability" class="form-select filter"><option>All</option><option>Dog-Friendly</option><option>Wheelchair-Friendly</option><option>Family-Friendly</option><option>Stroller-Friendly</option><option>Photography</option><option>Wildlife</option><option>River</option><option>Fishing</option><option>Waterfalls</option><option>Camping</option><option>Wildflowers</option></select>
         </div></div>
       </aside>
-
       <section class="col-lg-9">
         <div class="card"><div class="card-body">
           <div class="d-flex justify-content-between align-items-center flex-wrap gap-2 mb-3">
@@ -172,9 +149,7 @@
       </section>
     </div>
   </main>
-
   <footer class="text-center text-white p-4"><p class="m-0">Designed for easier trail planning, safer visits, and better accessibility.</p></footer>
-
   <div class="modal fade" id="trailModal" tabindex="-1">
     <div class="modal-dialog modal-dialog-centered"><div class="modal-content overflow-hidden">
       <img id="modalImg" class="modal-img" alt="Trail image">
@@ -185,10 +160,8 @@
       </div>
     </div></div>
   </div>
-
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
-
   <script>
     const trails = [
       [
@@ -546,7 +519,6 @@
       resultCount.textContent = `Showing ${paginatedList.length} of ${trails.length} trails`;
       markers.forEach(m => map.removeLayer(m));
       markers = [];
-
       paginatedList.forEach(t => {
         const i = trails.indexOf(t);
         cards.innerHTML += `
@@ -559,7 +531,6 @@
               <button class="btn btn-outline-success btn-sm" onclick="viewOnMap(${i})">View on Map</button>
             </div>
           </div></div>`;
-
         const marker = L.marker(t[10]).addTo(map).bindPopup(`${t[0]}<br>${t[1]}<br>${t[3]}<br>${t[4]}`);
         marker.trailIndex = i;
         markers.push(marker);
@@ -607,8 +578,7 @@
     }
 
     function setFilter(id, value) { resetFilters(false); document.getElementById(id).value = value; show(); }
-    function resetFilters(render = true) { search.value = ""; [difficulty, distance, elevation, route_type, location, forest, description, suitability].forEach(el => el.value = "All"); if (render) show(); }
-
+    function resetFilters(render = true) { search.value = ""; [difficulty, distance, elevation, route_type, suitability].forEach(el => el.value = "All"); if (render) show(); }
     search.addEventListener("input", () => {currentPage = 0; show(); });
     document.querySelectorAll(".filter").forEach(el => {el.addEventListener("change", () => {currentPage = 0; show();});});
     window.addEventListener("load", () => { show(); setTimeout(() => map.invalidateSize(), 300); });
