@@ -9,10 +9,57 @@
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
 
   <style>
-    body { background:#f4f6f1; color:#1f2a1f; }
+    body::before {
+      content: "";
+      position: fixed;
+      inset: 0;
+      background: rgba(255,255,255,0.35);
+      z-index: -1;
+    }
+    body { 
+      background-image: url("background.png");
+      background-size: cover;
+      background-position: center;
+      background-repeat: no-repeat;
+      background-attachment: fixed;
+      color:#1f2a1f; 
+    }
     .navbar, footer { background:#143d2a; }
-    .card { border:0; border-radius:14px; box-shadow:0 3px 10px #0002; }
-    #map { min-height:350px; border-radius:14px; overflow:hidden; }
+    .navbar {
+      background: rgba(20, 61, 42, 0.9);
+      backdrop-filter: blur(8px);
+      border-bottom: 2px solid #050504;
+      box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+      padding-top: 0px;
+      padding-bottom: 0px;
+    }
+    .navbar-brand img {
+      height: 65px;
+      width: auto;
+    }
+    .card { border: 2px solid #060505; border-radius:14px; box-shadow:0 3px 10px #0002; }
+    .map-section {
+      position: relative;
+    }
+    #map {
+      height: 75vh;
+      min-height: 600px;
+      width: 100%;
+      border-radius: 18px;
+      overflow: hidden;
+      border: 2px solid #050504
+    }
+    .overlay-box {
+      position: absolute;
+      top: 50px;
+      right: 50px;
+      width: 350px;
+      z-index: 1000;
+      background: rgb(255, 255, 255, 0.55);
+      backdrop-filter: blur(10px);
+      border-radius: 18px;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.25);
+    }
     .trail-img, .modal-img { width:100%; object-fit:cover; }
     .trail-img { height:130px; }
     .modal-img { height:230px; }
@@ -26,7 +73,10 @@
 <body>
   <nav class="navbar navbar-expand-lg navbar-dark sticky-top">
     <div class="container-fluid px-4">
-      <a class="navbar-brand fw-bold" href="#">Stanislaus Trail Finder</a>
+      <a class="navbar-brand" href="#">
+        <img src="h!ke.png"
+          alt="h!ke logo">
+      </a>
       <button class="navbar-toggler" data-bs-toggle="collapse" data-bs-target="#navMenu"><span class="navbar-toggler-icon"></span></button>
       <div class="collapse navbar-collapse" id="navMenu">
         <div class="navbar-nav ms-auto">
@@ -37,39 +87,53 @@
       </div>
     </div>
   </nav>
-
-  <section class="container-fluid p-4">
-    <div class="row g-4">
-      <div class="col-lg-6">
-        <div class="card h-100"><div class="card-body p-4">
-          <h1 class="text-success-emphasis">Find the right trail faster.</h1>
-          <p>Search trails, filter by difficulty or accessibility, and check basic details before you go.</p>
-          <input id="search" class="form-control mb-3" placeholder="Search trails or features">
-          <div class="d-flex flex-wrap gap-2">
-            <button class="btn btn-gold" onclick="setFilter('difficulty','Easy')">Easy</button>
-            <button class="btn btn-gold" onclick="setFilter('feature','Family')">Family</button>
-            <button class="btn btn-gold" onclick="setFilter('access','Accessible')">Accessible</button>
-            <button class="btn btn-outline-secondary" onclick="resetFilters()">Reset</button>
-          </div>
-        </div></div>
-      </div>
-      <div class="col-lg-6">
-        <div class="card h-100"><div class="card-body p-3"><div id="map"></div></div></div>
+  <section class="map-section position-relative p-4">
+    <div id="map"></div>
+    <div class="overlay-box card">
+      <div class="card-body">
+        <h2 class="text-success-emphasis">
+          Your adventure awaits
+        </h2>
+        <p class="small">
+          Use quick options or the search bar to find the right trail for you!
+        </p>
+        <input
+          id="search"
+          class="form-control mb-3"
+          placeholder="Search by name, city, park...">
+        <div class="d-flex flex-wrap gap-2">
+          <button class="btn btn-gold"
+            onclick="setFilter('Difficulty','Easy')">
+            Easy
+          </button>
+          <button class="btn btn-gold"
+            onclick="setFilter('Suitability','Wheelchair-Friendly')">
+            Wheelchair
+          </button>
+          <button class="btn btn-gold"
+            onclick="setFilter('Suitability','Family-Friendly')">
+            Family
+          </button>
+          <button class="btn btn-outline-secondary"
+            onclick="resetFilters()">
+            Reset
+          </button>
+        </div>
       </div>
     </div>
   </section>
-
   <main id="trails" class="container-fluid px-4 pb-4">
     <div class="row g-4">
       <aside class="col-lg-3">
         <div class="card"><div class="card-body">
           <h3 class="h5 text-success-emphasis">Filters</h3>
-          <label class="form-label mt-2">Difficulty</label><select id="difficulty" class="form-select filter"><option>All</option><option>Easy</option><option>Moderate</option><option>Hard</option></select>
-          <label class="form-label mt-3">Accessibility</label><select id="access" class="form-select filter"><option>All</option><option>Accessible</option><option>Limited</option><option>Not Accessible</option></select>
-          <label class="form-label mt-3">Feature</label><select id="feature" class="form-select filter"><option>All</option><option>Family</option><option>Lake</option><option>Waterfall</option><option>Scenic</option></select>
+          <label class="form-label mt-3">Difficulty</label><select id="difficulty" class="form-select filter"><option>All</option><option>Easy</option><option>Moderate</option><option>Hard</option></select>
+          <label class="form-label mt-3">Distance</label><select id="distance" class="form-select filter"><option>All</option><option>0-3 miles</option><option>3-7 miles</option><option>7+ miles</option></select>
+          <label class="form-label mt-3">Elevation</label><select id="elevation" class="form-select filter"><option>All</option><option>0-500 feet</option><option>500-1500 feet</option><option>1500+ feet</option></select>
+          <label class="form-label mt-3">Route Type</label><select id="route_type" class="form-select filter"><option>All</option><option>loop</option><option>point-to-point</option><option>out & back</option></select>
+          <label class="form-label mt-3">Suitability</label><select id="suitability" class="form-select filter"><option>All</option><option>Dog-Friendly</option><option>Wheelchair-Friendly</option><option>Family-Friendly</option><option>Stroller-Friendly</option><option>Photography</option><option>Wildlife</option><option>River</option><option>Fishing</option><option>Waterfalls</option><option>Camping</option><option>Wildflowers</option></select>
         </div></div>
       </aside>
-
       <section class="col-lg-9">
         <div class="card"><div class="card-body">
           <div class="d-flex justify-content-between align-items-center flex-wrap gap-2 mb-3">
@@ -77,13 +141,15 @@
             <p id="resultCount" class="result-count m-0"></p>
           </div>
           <div id="cards" class="row g-3"></div>
+          <div class="d-flex justify-content-between mt-4">
+            <button class="btn btn-warning" onclick="prevPage()">Previous</button>
+            <button class="btn btn-warning" onclick="nextPage()">Next</button>
+          </div>
         </div></div>
       </section>
     </div>
   </main>
-
   <footer class="text-center text-white p-4"><p class="m-0">Designed for easier trail planning, safer visits, and better accessibility.</p></footer>
-
   <div class="modal fade" id="trailModal" tabindex="-1">
     <div class="modal-dialog modal-dialog-centered"><div class="modal-content overflow-hidden">
       <img id="modalImg" class="modal-img" alt="Trail image">
@@ -94,17 +160,304 @@
       </div>
     </div></div>
   </div>
-
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
-
   <script>
     const trails = [
-      ["Pinecrest Lake Loop", "Moderate", "Limited", "Lake", "3.9 mi", "357 ft", "https://commons.wikimedia.org/wiki/Special:FilePath/Pinecrest%20Lake%20California%201.jpg", [38.1914, -119.9899]],
-      ["Columns of the Giants", "Easy", "Accessible", "Family", "0.5 mi", "65 ft", "https://commons.wikimedia.org/wiki/Special:FilePath/Stanislaus%20National%20Forest%20Civil%20Engineers%20%2853108120124%29.jpg", [38.339909, -119.805822]],
-      ["Rainbow Pool Trail", "Easy", "Limited", "Waterfall", "0.2 mi", "29 ft", "https://commons.wikimedia.org/wiki/Special:FilePath/Morning%20Rainbow%20Under%20Yosemite%20Falls%20%2871889875%29.jpeg", [37.821474, -120.0051]],
-      ["Crabtree Trail to Bear Lake", "Moderate", "Not Accessible", "Lake", "8.0 mi", "931 ft", "https://commons.wikimedia.org/wiki/Special:FilePath/Mosquito%20Lake%20Stanislaus%20National%20Forest.jpg", [38.1725, -119.8844]],
-      ["Burst Rock via Gianelli Trail", "Moderate", "Not Accessible", "Scenic", "6.0 mi", "548 ft", "https://commons.wikimedia.org/wiki/Special:FilePath/Stanislaus%20National%20Forest%203N08.jpg", [38.19813, -119.88392]]
+      [
+        "Pinecrest Lake Loop",         
+        "Moderate",                    
+        "3.9 miles",                   
+        "357 ft",                      
+        "Loop",                        
+        ["Pinecrest", "California"],   
+        "Stanislaus National Forest",  
+        "Beautiful alpine lake trail with fishing, forest views, and picnic areas.", 
+        ["Dog-Friendly", "Family-Friendly", "Fishing"],
+        "https://commons.wikimedia.org/wiki/Special:FilePath/Pinecrest%20Lake%20California%201.jpg", 
+        [38.1914, -119.9899],
+      ],
+
+      [
+        "Yosemite Falls Trail",
+        "Hard",
+        "7.2 miles",
+        "3,200 ft",
+        "Out & Back",
+        ["Yosemite Valley", "California"],
+        "Yosemite National Park",
+        "Famous waterfall hike with panoramic valley views, granite cliffs, and access to one of the tallest waterfalls in North America.",
+        ["Family-Friendly", "Photography", "Waterfalls"],
+        "https://upload.wikimedia.org/wikipedia/commons/7/70/Yosemite_Falls_2.jpg",
+        [37.7565, -119.5967],
+      ],
+
+      [
+        "Mist Trail",
+        "Hard",
+        "6.4 miles",
+        "2,200 ft",
+        "Loop",
+        ["Yosemite Valley", "California"],
+        "Yosemite National Park",
+        "Iconic Yosemite hike passing Vernal Fall and Nevada Fall with steep granite stairways and mist-covered viewpoints.",
+        ["Waterfalls", "Photography", "Wildlife"],
+        "https://upload.wikimedia.org/wikipedia/commons/9/93/Vernal_Fall_from_Mist_Trail.jpg",
+        [37.7287, -119.5446],
+      ],
+
+      [
+        "Half Dome Trail",
+        "Hard",
+        "14.2 miles",
+        "4,800 ft",
+        "Out & Back",
+        ["Yosemite Valley", "California"],
+        "Yosemite National Park",
+        "Extremely challenging hike featuring cables, granite domes, alpine scenery, and panoramic Yosemite views.",
+        ["Photography", "Adventure"],
+        "https://upload.wikimedia.org/wikipedia/commons/e/ea/Half_Dome_from_Glacier_Point.jpg",
+        [37.7459, -119.5332],
+      ],
+
+      [
+        "Mirror Lake Trail",
+        "Easy",
+        "2.4 miles",
+        "300 ft",
+        "Loop",
+        ["Yosemite Valley", "California"],
+        "Yosemite National Park",
+        "Relaxed scenic walk to Mirror Lake with reflections of Half Dome and surrounding cliffs.",
+        ["Family-Friendly", "Dog-Friendly", "Photography"],
+        "https://upload.wikimedia.org/wikipedia/commons/0/0d/Mirror_Lake_Yosemite.jpg",
+        [37.7395, -119.5485],
+      ],
+
+      [
+        "Angels Landing",
+        "Hard",
+        "5.4 miles",
+        "1,500 ft",
+        "Out & Back",
+        ["Springdale", "Utah"],
+        "Zion National Park",
+        "Thrilling cliffside trail with chain-assisted sections and dramatic canyon views.",
+        ["Photography", "Adventure"],
+        "https://upload.wikimedia.org/wikipedia/commons/5/56/Angels_Landing.jpg",
+        [37.2692, -112.9507],
+      ],
+
+      [
+        "The Narrows Riverside Walk",
+        "Easy",
+        "2.2 miles",
+        "200 ft",
+        "Out & Back",
+        ["Springdale", "Utah"],
+        "Zion National Park",
+        "Riverside trail leading to the famous Narrows slot canyon with towering sandstone walls.",
+        ["Family-Friendly", "Photography", "River"],
+        "https://upload.wikimedia.org/wikipedia/commons/7/72/Zion_Narrows.jpg",
+        [37.2856, -112.9475],
+      ],
+
+      [
+        "Delicate Arch Trail",
+        "Moderate",
+        "3.2 miles",
+        "630 ft",
+        "Out & Back",
+        ["Moab", "Utah"],
+        "Arches National Park",
+        "Popular desert hike leading to Utah’s most famous sandstone arch with sunset photography opportunities.",
+        ["Photography", "Family-Friendly"],
+        "https://upload.wikimedia.org/wikipedia/commons/a/a5/Delicate_Arch_La_Sal_Mountains.jpg",
+        [38.7436, -109.4993],
+      ],
+
+      [
+        "Devils Bridge Trail",
+        "Moderate",
+        "4.2 miles",
+        "564 ft",
+        "Out & Back",
+        ["Sedona", "Arizona"],
+        "Coconino National Forest",
+        "Scenic red rock trail leading to the largest natural sandstone arch in Sedona.",
+        ["Photography", "Dog-Friendly"],
+        "https://upload.wikimedia.org/wikipedia/commons/5/58/Devils_Bridge_Sedona.jpg",
+        [34.9138, -111.8140],
+      ],
+
+      [
+        "Bright Angel Trail",
+        "Hard",
+        "15.6 miles",
+        "4,380 ft",
+        "Out & Back",
+        ["Grand Canyon Village", "Arizona"],
+        "Grand Canyon National Park",
+        "Historic canyon descent with dramatic layered rock formations and Colorado River access.",
+        ["Photography", "Adventure"],
+        "https://upload.wikimedia.org/wikipedia/commons/5/50/Bright_Angel_Trail.jpg",
+        [36.0570, -112.1438],
+      ],
+
+      [
+        "Avalanche Lake Trail",
+        "Moderate",
+        "5.9 miles",
+        "757 ft",
+        "Out & Back",
+        ["West Glacier", "Montana"],
+        "Glacier National Park",
+        "Forest trail leading to a glacier-fed lake surrounded by waterfalls and towering peaks.",
+        ["Family-Friendly", "Photography", "Wildlife"],
+        "https://upload.wikimedia.org/wikipedia/commons/9/92/Avalanche_Lake.jpg",
+        [48.6835, -113.8150],
+      ],
+
+      [
+        "Hidden Lake Overlook",
+        "Easy",
+        "2.8 miles",
+        "460 ft",
+        "Out & Back",
+        ["West Glacier", "Montana"],
+        "Glacier National Park",
+        "Boardwalk trail with alpine meadows, mountain goats, and sweeping lake views.",
+        ["Wheelchair-Friendly", "Photography", "Wildlife"],
+        "https://upload.wikimedia.org/wikipedia/commons/2/2f/Hidden_Lake_Glacier.jpg",
+        [48.6969, -113.7186],
+      ],
+
+      [
+        "Garibaldi Lake Trail",
+        "Hard",
+        "11.2 miles",
+        "2,625 ft",
+        "Out & Back",
+        ["Squamish", "British Columbia"],
+        "Garibaldi Provincial Park",
+        "Steep forest trail leading to vibrant turquoise alpine lake scenery.",
+        ["Camping", "Photography"],
+        "https://upload.wikimedia.org/wikipedia/commons/f/f1/Garibaldi_Lake.jpg",
+        [49.9508, -123.0045],
+      ],
+
+      [
+        "Skyline Trail",
+        "Moderate",
+        "5.5 miles",
+        "1,100 ft",
+        "Loop",
+        ["Paradise", "Washington"],
+        "Mount Rainier National Park",
+        "Wildflower-filled alpine trail with glaciers and Mount Rainier panoramas.",
+        ["Family-Friendly", "Photography", "Wildflowers"],
+        "https://upload.wikimedia.org/wikipedia/commons/7/70/Mount_Rainier_Skyline_Trail.jpg",
+        [46.7861, -121.7353],
+      ],
+
+      [
+        "Rattlesnake Ledge",
+        "Moderate",
+        "4.0 miles",
+        "1,160 ft",
+        "Out & Back",
+        ["North Bend", "Washington"],
+        "Rattlesnake Mountain Scenic Area",
+        "Popular Pacific Northwest trail with forest scenery and lake overlook viewpoints.",
+        ["Dog-Friendly", "Photography"],
+        "https://upload.wikimedia.org/wikipedia/commons/5/56/Rattlesnake_Ledge.jpg",
+        [47.4345, -121.7684],
+      ],
+
+      [
+        "South Kaibab Trail",
+        "Hard",
+        "7.0 miles",
+        "3,000 ft",
+        "Out & Back",
+        ["Grand Canyon Village", "Arizona"],
+        "Grand Canyon National Park",
+        "Ridge-line Grand Canyon hike with dramatic sunrise and canyon depth views.",
+        ["Photography", "Adventure"],
+        "https://upload.wikimedia.org/wikipedia/commons/f/f9/South_Kaibab_Trail.jpg",
+        [36.0544, -112.0959],
+      ],
+
+      [
+        "Alum Cave Trail",
+        "Moderate",
+        "5.0 miles",
+        "1,125 ft",
+        "Out & Back",
+        ["Gatlinburg", "Tennessee"],
+        "Great Smoky Mountains National Park",
+        "Wooded Appalachian trail featuring stone bluffs, streams, and mountain views.",
+        ["Photography", "Wildflowers"],
+        "https://upload.wikimedia.org/wikipedia/commons/4/4c/Alum_Cave_Bluffs.jpg",
+        [35.6339, -83.4512],
+      ],
+
+      [
+        "Emerald Lake Trail",
+        "Easy",
+        "3.2 miles",
+        "702 ft",
+        "Out & Back",
+        ["Estes Park", "Colorado"],
+        "Rocky Mountain National Park",
+        "Classic alpine lake hike passing waterfalls, forests, and mountain lakes.",
+        ["Family-Friendly", "Photography"],
+        "https://upload.wikimedia.org/wikipedia/commons/0/0b/Emerald_Lake_Rocky_Mountain.jpg",
+        [40.3105, -105.6458],
+      ],
+
+      [
+        "Twin Falls Trail",
+        "Easy",
+        "2.6 miles",
+        "400 ft",
+        "Out & Back",
+        ["North Bend", "Washington"],
+        "Olallie State Park",
+        "Short forest hike leading to twin waterfalls in lush Pacific Northwest scenery.",
+        ["Family-Friendly", "Dog-Friendly", "Waterfalls"],
+        "https://upload.wikimedia.org/wikipedia/commons/3/3b/Twin_Falls_Washington.jpg",
+        [47.4586, -121.6951],
+      ],
+
+      [
+        "Observation Point Trail",
+        "Hard",
+        "8.0 miles",
+        "2,100 ft",
+        "Out & Back",
+        ["Springdale", "Utah"],
+        "Zion National Park",
+        "Elevated canyon overlook trail with sweeping views above Zion Canyon.",
+        ["Photography", "Adventure"],
+        "https://upload.wikimedia.org/wikipedia/commons/e/e7/Observation_Point_Zion.jpg",
+        [37.2708, -112.9438],
+      ],
+
+      [
+        "Tahoe Rim Trail",
+        "Moderate",
+        "5.1 miles",
+        "800 ft",
+        "Loop",
+        ["South Lake Tahoe", "California"],
+        "Tahoe National Forest",
+        "Scenic alpine ridge trail overlooking Lake Tahoe and Sierra Nevada peaks.",
+        ["Dog-Friendly", "Mountain Biking", "Photography"],
+        "https://upload.wikimedia.org/wikipedia/commons/6/67/Tahoe_Rim_Trail.jpg",
+        [38.9399, -119.9772],
+      ],
+      
     ];
 
     const fallback = "https://images.unsplash.com/photo-1500530855697-b586d89ba3ee?auto=format&fit=crop&w=900&q=80";
@@ -116,31 +469,69 @@
 
     const matches = (t) => {
       const q = search.value.toLowerCase();
-      return (!q || t[0].toLowerCase().includes(q) || t[3].toLowerCase().includes(q)) &&
-        [difficulty, access, feature].every((el, i) => el.value === "All" || t[i + 1] === el.value);
+      return (
+        (!q ||
+          t[0].toLowerCase().includes(q) || 
+          t[5][0].toLowerCase().includes(q) ||
+          t[5][1].toLowerCase().includes(q) || 
+          t[6].toLowerCase().includes(q) ||
+          t[7].toLowerCase().includes(q) 
+        )
+        &&
+        (difficulty.value === "All" || t[1] === difficulty.value)
+        &&
+        (distance.value === "All" ||
+          (distance.value === "0-3 miles" && parseFloat(t[2]) < 3) ||
+          (distance.value === "3-7 miles" &&
+            parseFloat(t[2]) >= 3 &&
+            parseFloat(t[2]) <= 7) ||
+          (distance.value === "7+ miles" &&
+            parseFloat(t[2]) > 7)
+        )
+        &&
+        (elevation.value === "All" ||
+          (elevation.value === "0-500 feet" &&
+            parseInt(t[3].replace(/,/g, "")) < 500) ||
+          (elevation.value === "500-1500 feet" &&
+            parseInt(t[3].replace(/,/g, "")) >= 500 &&
+            parseInt(t[3].replace(/,/g, "")) <= 1500) ||
+          (elevation.value === "1500+ feet" &&
+            parseInt(t[3].replace(/,/g, "")) > 1500)
+        )
+        &&
+        (route_type.value === "All" ||
+          t[4].toLowerCase() === route_type.value.toLowerCase())
+        &&
+        (suitability.value === "All" ||
+          t[8].includes(suitability.value))
+      );
     };
+
+    let currentPage = 0;
+    const trailsPerPage = 6;
 
     function show() {
       const list = trails.filter(matches);
+      const start = currentPage * trailsPerPage;
+      const end = start + trailsPerPage;
+      const paginatedList = list.slice(start, end);
       cards.innerHTML = list.length ? "" : `<div class="col-12"><div class="alert alert-light border">No trails match your search. Try clearing one filter.</div></div>`;
-      resultCount.textContent = `Showing ${list.length} of ${trails.length} trails`;
+      resultCount.textContent = `Showing ${paginatedList.length} of ${trails.length} trails`;
       markers.forEach(m => map.removeLayer(m));
       markers = [];
-
-      list.forEach(t => {
+      paginatedList.forEach(t => {
         const i = trails.indexOf(t);
         cards.innerHTML += `
           <div class="col-md-6 col-xl-4"><div class="card h-100 overflow-hidden">
-            <img class="trail-img" src="${t[6]}" alt="${t[0]}" onerror="this.src='${fallback}'">
+            <img class="trail-img" src="${t[9]}" alt="${t[0]}" onerror="this.src='${fallback}'">
             <div class="card-body">
               <h5 class="card-title text-success-emphasis">${t[0]}</h5>
-              <p class="card-text">${t[1]}<br>${t[4]}<br>${t[2]}</p>
+              <p class="card-text">${t[1]}<br>${t[2]}<br>${t[5]}</p>
               <button class="btn btn-green btn-sm" onclick="details(${i})">View Details</button>
               <button class="btn btn-outline-success btn-sm" onclick="viewOnMap(${i})">View on Map</button>
             </div>
           </div></div>`;
-
-        const marker = L.marker(t[7]).addTo(map).bindPopup(`${t[0]}<br>${t[1]}<br>${t[4]}<br>${t[2]}`);
+        const marker = L.marker(t[10]).addTo(map).bindPopup(`${t[0]}<br>${t[1]}<br>${t[3]}<br>${t[4]}`);
         marker.trailIndex = i;
         markers.push(marker);
       });
@@ -156,7 +547,7 @@
 
     function viewOnMap(i) {
       const marker = markers.find(m => m.trailIndex === i);
-      map.setView(trails[i][7], 14);
+      map.setView(trails[i][10], 14);
       if (marker) marker.openPopup();
       map._container.scrollIntoView({ behavior:"smooth", block:"center" });
       setTimeout(() => map.invalidateSize(), 200);
@@ -164,18 +555,32 @@
 
     function details(i) {
       const t = trails[i];
-      modalImg.src = t[6];
+      modalImg.src = t[9];
       modalImg.onerror = () => modalImg.src = fallback;
       modalTitle.textContent = t[0];
-      modalInfo.innerHTML = `Difficulty: ${t[1]}<br>Accessibility: ${t[2]}<br>Feature: ${t[3]}<br>Distance: ${t[4]}<br>Elevation: ${t[5]}`;
+      modalInfo.innerHTML = `Difficulty: ${t[1]}<br>Distance: ${t[2]}<br>Elevation: ${t[3]}<br>Route Type: ${t[4]}<br>Location: ${t[5]}<br>Forest: ${t[6]}<br>Description: ${t[7]}<br>Suitability: ${t[8]}`;
       modal.show();
     }
 
-    function setFilter(id, value) { resetFilters(false); document.getElementById(id).value = value; show(); }
-    function resetFilters(render = true) { search.value = ""; [difficulty, access, feature].forEach(el => el.value = "All"); if (render) show(); }
+    function nextPage() {
+      const filtered = trails.filter(matches);
+      if ((currentPage + 1) * trailsPerPage < filtered.length) {
+        currentPage++;
+        show();
+      }
+    }
 
-    search.addEventListener("input", show);
-    document.querySelectorAll(".filter").forEach(el => el.addEventListener("change", show));
+    function prevPage() {
+      if (currentPage > 0) {
+        currentPage--;
+        show();
+      }
+    }
+
+    function setFilter(id, value) { resetFilters(false); document.getElementById(id).value = value; show(); }
+    function resetFilters(render = true) { search.value = ""; [difficulty, distance, elevation, route_type, suitability].forEach(el => el.value = "All"); if (render) show(); }
+    search.addEventListener("input", () => {currentPage = 0; show(); });
+    document.querySelectorAll(".filter").forEach(el => {el.addEventListener("change", () => {currentPage = 0; show();});});
     window.addEventListener("load", () => { show(); setTimeout(() => map.invalidateSize(), 300); });
     window.addEventListener("resize", () => map.invalidateSize());
   </script>
